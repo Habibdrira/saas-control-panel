@@ -23,3 +23,6 @@ class Config:
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     POSTS_PER_PAGE = 25
+
+    # API KEY pour communication inter-services (Control Panel)
+    MICROBLOG_API_KEY = os.environ.get('MICROBLOG_API_KEY', 'changeme')
