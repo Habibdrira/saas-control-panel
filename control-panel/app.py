@@ -61,3 +61,38 @@ def delete(name):
 
 if __name__=="__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
+
+# ==================================================
+# USER DASHBOARD CONTAINER INTEGRATION (DOCKER)
+# ==================================================
+
+import docker
+
+docker_client = docker.from_env()
+
+def create_user_dashboard_container(username, email):
+    """
+    Create a dedicated user-dashboard container for a user
+    """
+    container_name = f"user-dashboard-{username}"
+
+    container = docker_client.containers.run(
+        "user-dashboard",
+        name=container_name,
+        environment={
+            "USERNAME": username,
+            "EMAIL": email,
+            "PLAN": "Free",
+            "CONTAINER_NAME": container_name
+        },
+        ports={"80/tcp": None},
+        detach=True
+    )
+
+    return container
+
+@app.route("/test/create/<username>")
+def test_create_container(username):
+    email = f"{username}@example.com"
+    create_user_dashboard_container(username, email)
+    return f"User dashboard container created for {username}"
