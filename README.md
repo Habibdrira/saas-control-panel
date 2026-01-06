@@ -1,25 +1,32 @@
-# SaaS Control Panel – Flask & Docker
+# SaaS Docker Control Panel
 
-## Description
-This project implements a SaaS architecture where each user
-gets a dedicated application container automatically provisioned.
+## 📌 Présentation
+Ce projet est une plateforme SaaS qui crée automatiquement
+un container Docker dédié pour chaque utilisateur inscrit.
 
-## Architecture
-- Flask (Control Panel)
-- Docker (Container isolation)
-- Microblog (SaaS application)
-- Nginx (Reverse Proxy – next step)
+## 🏗️ Architecture
+- Microblog (Flask) : application SaaS utilisateur
+- Control Panel (Flask) : API d’orchestration Docker
+- Docker Engine : isolation par container
 
-## Features
-- One container per user
-- Secure API provisioning
-- Admin control panel
-- User SaaS interface
+## 🔄 Fonctionnement
+1. L’utilisateur s’inscrit sur Microblog
+2. Microblog appelle l’API du Control Panel
+3. Un container Docker est créé automatiquement
+4. L’utilisateur dispose de son instance dédiée
 
-## Requirements
-- Linux
-- Docker
-- Python 3.10+
+## ⚙️ Technologies
+- Python / Flask
+- Docker SDK
+- REST API
+- Linux (Ubuntu)
 
-## Author
-Habib Drira
+## ▶️ Lancement
+
+### Control Panel
+```bash
+cd control-panel
+source venv/bin/activate
+export CONTROL_PANEL_API_KEY=super-secret-key
+python3 run.py
+

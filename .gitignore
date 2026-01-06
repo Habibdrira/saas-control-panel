@@ -1,6 +1,13 @@
+# Environnements Python
 venv/
 __pycache__/
 *.pyc
+
+# Variables sensibles
 .env
-instance/
-*.sqlite
+
+# Logs
+*.log
+
+# Fichiers système
+.DS_Store
