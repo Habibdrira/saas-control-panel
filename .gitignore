@@ -1,13 +1,7 @@
-# Environnements Python
-venv/
 __pycache__/
 *.pyc
-
-# Variables sensibles
 .env
-
-# Logs
-*.log
-
-# Fichiers système
-.DS_Store
+venv/
+node_modules/
+dist/
+auth-service/users.db
