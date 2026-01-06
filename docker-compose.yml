@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+
+  control-panel:
+    build: ./control-panel
+    ports:
+      - "5001:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - control-panel
+    restart: always

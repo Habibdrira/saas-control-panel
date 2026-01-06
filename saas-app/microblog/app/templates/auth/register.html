@@ -1,7 +1,31 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
-    <h1>{{ _('Register') }}</h1>
-    {{ wtf.quick_form(form) }}
+<h2>Register</h2>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+
+    <p>
+        <label>Username</label><br>
+        {{ form.username(size=32) }}
+    </p>
+
+    <p>
+        <label>Email</label><br>
+        {{ form.email(size=32) }}
+    </p>
+
+    <p>
+        <label>Password</label><br>
+        {{ form.password(size=32) }}
+    </p>
+
+    <p>
+        <label>Repeat Password</label><br>
+        {{ form.password2(size=32) }}
+    </p>
+
+    <p>{{ form.submit() }}</p>
+</form>
 {% endblock %}

@@ -1,26 +1,29 @@
+import os
 import requests
-from flask import current_app
+
+CONTROL_PANEL_URL = os.environ.get(
+    "CONTROL_PANEL_URL",
+    "http://127.0.0.1:5000/api/provision"
+)
+
+CONTROL_PANEL_API_KEY = os.environ.get(
+    "CONTROL_PANEL_API_KEY",
+    "super-secret-key"
+)
+
 
 def provision_user_container(username):
-    """
-    Appel l'API du Control Panel pour créer
-    un conteneur Docker pour l'utilisateur.
-    """
-
-    url = current_app.config['CONTROL_PANEL_URL']
-    api_key = current_app.config['CONTROL_PANEL_API_KEY']
-
-    headers = {
-        "Content-Type": "application/json",
-        "X-API-KEY": api_key
-    }
-
     payload = {
         "username": username
     }
 
+    headers = {
+        "Content-Type": "application/json",
+        "X-API-KEY": CONTROL_PANEL_API_KEY
+    }
+
     response = requests.post(
-        url,
+        CONTROL_PANEL_URL,
         json=payload,
         headers=headers,
         timeout=5
@@ -28,7 +31,7 @@ def provision_user_container(username):
 
     if response.status_code != 201:
         raise Exception(
-            f"Provision failed {response.status_code}: {response.text}"
+            f"Provision failed: {response.status_code} {response.text}"
         )
 
     return response.json()
