@@ -1,25 +1,25 @@
-# SaaS Control Panel
+# SaaS Control Panel – Flask & Docker
 
-Plateforme SaaS basée sur Python et Docker permettant de créer et gérer
-des conteneurs Docker pour chaque utilisateur.
-
-## Objectif
-Mettre en pratique Python avancé pour l’administration système
-à travers l’orchestration Docker.
+## Description
+This project implements a SaaS architecture where each user
+gets a dedicated application container automatically provisioned.
 
 ## Architecture
-- Interface Web SaaS
-- Control Panel Flask
-- Docker Engine
-- Un conteneur par utilisateur
+- Flask (Control Panel)
+- Docker (Container isolation)
+- Microblog (SaaS application)
+- Nginx (Reverse Proxy – next step)
 
-## Technologies
-- Python 3
-- Flask
+## Features
+- One container per user
+- Secure API provisioning
+- Admin control panel
+- User SaaS interface
+
+## Requirements
+- Linux
 - Docker
-- Linux (Ubuntu)
+- Python 3.10+
 
-## Structure du projet
-- control-panel/ : administration système
-- saas-app/ : application SaaS (CRM)
-- docs/ : documentation
+## Author
+Habib Drira
