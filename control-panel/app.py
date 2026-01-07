@@ -1,98 +1,118 @@
-from flask import Flask, render_template, request, redirect, jsonify
-import docker, time
+from flask import Flask, request, redirect
+import docker
 
 app = Flask(__name__)
 client = docker.from_env()
 
-IMAGE = "user-dashboard:adminlte-user"
-
-@app.route("/", methods=["GET","POST"])
+@app.route("/login", methods=["GET","POST"])
 def login():
     if request.method == "POST":
-        return redirect("/dashboard")
-    return render_template("login.html")
+        if request.form["username"]=="admin" and request.form["password"]=="admin123":
+            return redirect("/admin")
+        return "Invalid admin"
+    return """
+    <h2>Docker Admin</h2>
+    <form method="post">
+      <input name="username">
+      <input name="password">
+      <button>Login</button>
+    </form>
+    """
 
-@app.route("/dashboard")
-def dashboard():
-    containers=[]
+@app.route("/admin")
+def admin():
+    html = """
+    <h1>Containers</h1>
+    <form method="post" action="/create">
+      <input name="username" placeholder="username">
+      <button>Create Container</button>
+    </form>
+    <table border=1>
+    <tr><th>Name</th><th>Status</th><th>Port</th><th>Actions</th></tr>
+    """
     for c in client.containers.list(all=True):
-        c.reload()
-        ports=c.attrs["NetworkSettings"]["Ports"]
-        port=ports["80/tcp"][0]["HostPort"] if ports.get("80/tcp") else ""
-        containers.append({"name":c.name,"status":c.status,"port":port})
-    return render_template("dashboard.html", containers=containers)
+        ports = c.attrs["NetworkSettings"]["Ports"]
+        port = ports["80/tcp"][0]["HostPort"] if ports.get("80/tcp") else "-"
+        html += f"""
+        <tr>
+          <td>{c.name}</td>
+          <td>{c.status}</td>
+          <td>{port}</td>
+          <td>
+            <a href='/open/{c.name}'>Open</a> |
+            <a href='/start/{c.name}'>Start</a> |
+            <a href='/stop/{c.name}'>Stop</a> |
+            <a href='/delete/{c.name}'>Delete</a>
+          </td>
+        </tr>
+        """
+    html += "</table>"
+    return html
+
+@app.route("/create", methods=["POST"])
+def create():
+    u = request.form["username"]
+    try:
+        client.containers.run(
+            "user-app",
+            name=f"user-{u}",
+            detach=True,
+            ports={"80/tcp":None},
+            environment={"USERNAME":u,"EMAIL":"manual@local"}
+        )
+    except:
+        pass
+    return redirect("/admin")
 
 @app.route("/api/provision", methods=["POST"])
 def provision():
-    u=request.json["username"]
-    name=f"user_{u}"
-
+    u = request.json["username"]
+    e = request.json.get("email","")
     try:
-        c=client.containers.get(name)
-        c.reload()
-    except docker.errors.NotFound:
-        c=client.containers.run(
-            IMAGE,
-            name=name,
-            environment={"USERNAME":u},
+        client.containers.run(
+            "user-app",
+            name=f"user-{u}",
+            detach=True,
             ports={"80/tcp":None},
-            detach=True
+            environment={"USERNAME":u,"EMAIL":e}
         )
-        time.sleep(0.5)
-        c.reload()
+    except:
+        pass
+    return {"status":"ok"}
 
-    p=c.attrs["NetworkSettings"]["Ports"]["80/tcp"][0]["HostPort"]
-    return jsonify({"url":f"http://localhost:{p}"})
+@app.route("/api/user/<u>/port")
+def get_port(u):
+    c = client.containers.get(f"user-{u}")
+    port = c.attrs["NetworkSettings"]["Ports"]["80/tcp"][0]["HostPort"]
+    return {"port":port}
 
-@app.route("/api/resolve", methods=["POST"])
-def resolve():
-    u=request.json["username"]
-    c=client.containers.get(f"user_{u}")
-    c.reload()
-    p=c.attrs["NetworkSettings"]["Ports"]["80/tcp"][0]["HostPort"]
-    return jsonify({"url":f"http://localhost:{p}"})
+@app.route("/api/user/<u>", methods=["DELETE"])
+def delete_user(u):
+    try:
+        client.containers.get(f"user-{u}").remove(force=True)
+    except:
+        pass
+    return {"status":"deleted"}
+
+@app.route("/open/<name>")
+def open_c(name):
+    c = client.containers.get(name)
+    port = c.attrs["NetworkSettings"]["Ports"]["80/tcp"][0]["HostPort"]
+    return redirect(f"http://localhost:{port}")
+
+@app.route("/start/<name>")
+def start(name):
+    client.containers.get(name).start()
+    return redirect("/admin")
+
+@app.route("/stop/<name>")
+def stop(name):
+    client.containers.get(name).stop()
+    return redirect("/admin")
 
 @app.route("/delete/<name>")
 def delete(name):
-    c=client.containers.get(name)
-    c.stop()
-    c.remove()
-    return redirect("/dashboard")
+    client.containers.get(name).remove(force=True)
+    return redirect("/admin")
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
-
-# ==================================================
-# USER DASHBOARD CONTAINER INTEGRATION (DOCKER)
-# ==================================================
-
-import docker
-
-docker_client = docker.from_env()
-
-def create_user_dashboard_container(username, email):
-    """
-    Create a dedicated user-dashboard container for a user
-    """
-    container_name = f"user-dashboard-{username}"
-
-    container = docker_client.containers.run(
-        "user-dashboard",
-        name=container_name,
-        environment={
-            "USERNAME": username,
-            "EMAIL": email,
-            "PLAN": "Free",
-            "CONTAINER_NAME": container_name
-        },
-        ports={"80/tcp": None},
-        detach=True
-    )
-
-    return container
-
-@app.route("/test/create/<username>")
-def test_create_container(username):
-    email = f"{username}@example.com"
-    create_user_dashboard_container(username, email)
-    return f"User dashboard container created for {username}"
+app.run(host="0.0.0.0", port=5001)
