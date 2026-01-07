@@ -1,165 +1,270 @@
+# SaaS Control Panel
+## Python Advanced – System Administration Project
 
-# SaaS Control Panel — Python-Based Container Management Platform
+---
 
 ## 1. Project Overview
 
-The **SaaS Control Panel** is a Python-based Software as a Service (SaaS) platform that provides a **web interface for managing Docker containers**.
-The project is designed to demonstrate **advanced Python backend development**, system administration concepts, and container orchestration using Docker.
+This project is a **mini SaaS (Software as a Service) platform** developed for the course **Python Advanced (System Administration)**.
 
-The main goal is **not** the web server (Nginx is optional and not the focus), but rather:
-- Advanced usage of **Python with Docker**
-- Clean architecture and clear separation of responsibilities
-- Automation of container lifecycle management
-- Ability to explain and justify every technical choice
+The objective is to demonstrate how **Python can be used as a system administration and automation tool**, capable of managing containers, services, and users dynamically using Docker.
 
-This project fully satisfies the academic and technical requirements of a **Cloud / DevOps / System Administration** project.
+The project simulates a real SaaS environment where:
+- Users register and automatically receive an isolated service
+- Administrators manage users and infrastructure
+- All system operations are automated using Python
 
 ---
 
-## 2. What Problem Does This Project Solve?
+## 2. SaaS Logic
 
-In real SaaS platforms:
-- Users do not manage infrastructure directly
-- Containers are created automatically
-- Administrators control resources centrally
+In a real SaaS platform:
+- Each user must be isolated
+- Resources are created and destroyed dynamically
+- Automation replaces manual system tasks
+- Administration is centralized
 
-This project simulates exactly that:
+This project follows the same logic:
+- Each user gets a **dedicated Docker container**
+- Containers are created automatically at registration
+- Containers are deleted automatically when users are removed
+- Administrators manage users and containers via web interfaces
 
-- A **Control Panel** acts as the brain of the system
-- Users interact with a web interface
-- Docker is managed programmatically using Python
+This makes the project close to real-world SaaS and cloud platforms.
 
 ---
 
-## 3. Global Architecture (High Level)
+## 3. Global Architecture
+
+The platform is built using a **micro-services architecture** composed of three independent services.
 
 ```
-+--------------------+
-|   Web Browser      |
-| (Admin / User UI)  |
-+---------+----------+
-          |
-          | HTTP Requests
-          v
-+-----------------------------+
-|  Python Control Panel       |
-|  Flask Backend API          |
-|-----------------------------|
-|  - Business Logic           |
-|  - Docker Orchestration     |
-|  - User / Admin Management  |
-+-------------+---------------+
-              |
-              | Docker SDK for Python
-              v
-+-----------------------------+
-|      Docker Engine          |
-|      (Linux Host)           |
-+-------------+---------------+
-              |
-              v
-+-----------------------------+
-|   User Containers           |
-| (1 container per user)      |
-+-----------------------------+
+User Browser
+     |
+     |  Login / Register
+     v
++----------------------+
+|     Auth-Service     |  (Port 5000)
+|  - Authentication    |
+|  - Users database    |
+|  - Admin users panel |
++----------+-----------+
+           |
+           | REST API calls
+           v
++----------------------+
+|    Control-Panel     |  (Port 5001)
+|  - Docker management |
+|  - Container admin   |
+|  - System actions    |
++----------+-----------+
+           |
+           v
++----------------------+
+|    Docker Engine     |
++----------+-----------+
+           |
+           v
++----------------------+
+|     User-App         |  (Dynamic Port)
+|  - One container     |
+|  - One user          |
+|  - Isolated service  |
++----------------------+
 ```
 
-This architecture is intentionally simple, clear, and explainable.
+Each service has a **single and clear responsibility**, following professional system design principles.
 
 ---
 
-## 4. Core Component: Python Control Panel
+## 4. Services Description
 
-The **Control Panel** is the most important part of the project.
+### 4.1 Auth-Service (Port 5000)
 
-It is implemented using **Python + Flask**, and it is responsible for:
+**Role:** Authentication and user administration.
 
-- Receiving HTTP requests from the UI
-- Validating user actions
-- Communicating with Docker using the Docker SDK
-- Managing container lifecycle
-- Acting as an abstraction layer over Docker
+**Responsibilities:**
+- User registration
+- User login
+- Store users in SQLite database
+- Admin authentication
+- Admin dashboard (list users, delete users)
+- Trigger container creation and deletion via Control-Panel API
 
-### Why Python is the Core Value
+This service represents the **security and business logic layer** of the SaaS.
 
-- Python allows clean, readable, and maintainable code
-- Docker SDK provides a professional alternative to shell scripts
-- Flask enables REST-style APIs and web interfaces
-- Easy to extend (database, authentication, monitoring)
+---
+
+### 4.2 Control-Panel (Port 5001)
+
+**Role:** System administration and container orchestration.
+
+**Responsibilities:**
+- Communicate directly with Docker Engine
+- Create user containers dynamically
+- Start containers
+- Stop containers
+- Delete containers
+- Inspect container status
+- Expose REST APIs for provisioning
+
+This service demonstrates **Python used as a system administrator**.
+
+---
+
+### 4.3 User-App (Dynamic Port)
+
+**Role:** Dedicated application environment for each user.
+
+**Responsibilities:**
+- Display user dashboard
+- Show username and email
+- Provide logout functionality
+- Run inside an isolated Docker container
+
+Each user runs in a **separate container**, ensuring isolation and security.
+
+---
+
+## 5. Python Advanced – System Administration
+
+This project uses Python as a **system administration language**.
+
+Python is responsible for:
+- Docker container lifecycle management
+- Infrastructure automation
+- System resource control
+- Service orchestration
+- Replacing manual CLI-based administration
 
 This demonstrates **advanced Python usage beyond basic scripting**.
 
 ---
 
-## 5. Container Lifecycle Management (Detailed)
+## 6. Container Lifecycle Management (Detailed)
 
-The project implements full container lifecycle control:
+Each user container follows a complete lifecycle controlled by Python:
 
-### Create Container
-- Generate a unique container name
-- Assign a free TCP port
-- Launch container using Docker SDK
-- Store container metadata
+1. **Creation**
+   - Triggered automatically after user registration
+   - Docker SDK creates the container
+   - Ports are assigned dynamically
 
-### Start Container
-- Use Docker SDK to start stopped containers
-- Update status in the UI
+2. **Execution**
+   - Container runs the user application
+   - Environment variables are injected
 
-### Stop Container
-- Gracefully stop a running container
-- Preserve container state
+3. **Monitoring**
+   - Admin can view container status
+   - Admin can open the container in browser
 
-### Delete Container
-- Remove container permanently
-- Free allocated resources
+4. **Stop / Start**
+   - Containers can be stopped or restarted by admin
 
-### View Status
-- Display container state (running / stopped)
-- Display exposed ports
+5. **Deletion**
+   - Triggered when a user is deleted
+   - Container is removed automatically
+   - System resources are released
 
-All these actions are handled **programmatically in Python**.
-
----
-
-## 6. Administration System (System Administration View)
-
-This project includes a **real administration layer**, similar to what a system administrator or DevOps engineer would use.
-
-### Administrator Responsibilities
-
-- Full control over all containers
-- Infrastructure supervision
-- Resource isolation
-- Security enforcement
-
-### Admin Capabilities
-
-- List all containers
-- Start / stop / delete any container
-- Monitor container status
-- Manage user environments
-
-The administrator interacts only with the Control Panel, never directly with Docker.
+All lifecycle operations are handled programmatically in Python.
 
 ---
 
-## 7. User Experience
+## 7. How to Use the Project (Step by Step)
 
-Users have a simplified interface:
+### Step 1: Clone the repository
+```bash
+git clone https://github.com/Habibdrira/saas-control-panel.git
+cd saas-control-panel
+```
 
-- View their container
-- See container status
-- Access their application
-- No direct access to Docker or host system
+### Step 2: Build images automatically (recommended)
+```bash
+docker compose build --no-cache
+```
 
-This separation ensures security and stability.
+### Step 3: Run the platform
+```bash
+docker compose up
+```
 
 ---
 
-## 8. Tools and Technologies Used
+### Manual build of user-app (optional)
+```bash
+cd user-app
+docker build -t user-app .
+```
+
+This step is useful for development, debugging, or demonstration purposes.
+
+---
+
+### Access URLs
+
+- User login:  
+  http://localhost:5000/user/login
+
+- User registration:  
+  http://localhost:5000/user/register
+
+- Admin (Auth-Service):  
+  http://localhost:5000/admin/login
+
+- Admin (Control-Panel):  
+  http://localhost:5001/login
+
+---
+
+### Default Admin Credentials
+```
+Username: admin
+Password: admin123
+```
+
+---
+
+## 8. Docker Compose – Final Configuration
+
+The project uses Docker Compose to build and run services.
+
+```yaml
+version: "3.9"
+
+services:
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - control-panel
+      - user-app
+
+  control-panel:
+    build: ./control-panel
+    ports:
+      - "5001:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - user-app
+
+  user-app:
+    build: ./user-app
+    image: user-app
+```
+
+This configuration ensures:
+- Automatic image building
+- Dynamic container creation
+- Proper service orchestration
+
+---
+
+## 9. Tools and Technologies Used
 
 | Category | Technology |
-|-------|-----------|
+|--------|-----------|
 | Programming Language | Python 3 |
 | Backend Framework | Flask |
 | Container Management | Docker SDK for Python |
@@ -168,95 +273,46 @@ This separation ensures security and stability.
 | Orchestration | Docker Compose |
 | Operating System | Linux (Ubuntu / Rocky / FreeBSD) |
 
-⚠️ Docker on Windows is intentionally not used.
-
 ---
 
-## 9. Project Structure
+## 10. System Requirements
 
-```
-saas-control-panel/
-│
-├── control-panel/
-│   ├── app.py              # Main Flask application
-│   ├── routes/             # Admin and user routes
-│   ├── docker_manager.py   # Docker SDK logic
-│   └── templates/          # HTML templates
-│
-├── user-app/
-│   └── dashboard/          # User interface
-│
-├── docker-compose.yml      # Service orchestration
-├── requirements.txt        # Python dependencies
-├── saas-reset-run.sh       # Reset and run script
-└── README.md
-```
-
----
-
-## 10. How to Use the Project (Step by Step)
-
-### Step 1: Clone the repository
-
-```
-git clone https://github.com/Habibdrira/saas-control-panel.git
-cd saas-control-panel
-```
-
-### Step 2: Verify environment
-
-- Linux OS
+- Linux operating system
 - Docker installed
 - Docker Compose installed
+- Python 3.10 or higher
 
-```
-docker --version
-docker compose version
-```
-
-### Step 3: Give execution permissions
-
-```
-chmod +x saas-reset-run.sh
-```
-
-### Step 4: Run the platform
-
-```
-./saas-reset-run.sh
-```
-
-This script:
-- Stops existing containers
-- Rebuilds images
-- Starts the full SaaS platform
+> Docker on Windows is not supported.
 
 ---
 
-## 11. How This Project Meets the Requirements
+## 11. Learning Outcomes
 
-1. Web interface for container creation ✔
-2. Python backend communicating with Docker API ✔
-3. Full container lifecycle management ✔
-4. Clean GitHub repository with README ✔
-5. Runs on Linux VM ✔
-6. Student can explain architecture and code ✔
-
----
-
-## 12. Educational Value
-
-This project proves the ability to:
-
-- Design a SaaS architecture
-- Use Python for infrastructure automation
-- Manage Docker programmatically
-- Apply system administration principles
-- Explain and defend technical decisions
+This project demonstrates:
+- Python advanced programming
+- System administration automation
+- Docker container orchestration
+- SaaS architecture design
+- DevOps fundamentals
+- Micro-services architecture
 
 ---
 
-## 13. Conclusion
+## 12. Conclusion
 
-The SaaS Control Panel is not just a web project.
-It is a **complete Python-based system administration and DevOps solution**, designed to be understandable, extensible, and professionally structured.
+This project is a **complete and functional SaaS prototype** focused on **Python Advanced System Administration**.
+
+It demonstrates how Python can:
+- Automate infrastructure tasks
+- Manage containers dynamically
+- Control system resources
+- Implement real SaaS logic
+
+The project fully satisfies the requirements of **Python Advanced (Administration Système)**.
+
+---
+
+## Author
+
+Habib Drira  
+Python | Docker | System Administration | DevOps
