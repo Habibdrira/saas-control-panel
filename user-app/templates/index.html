@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+<div class="card">
+  <h1>User Dashboard</h1>
+
+  <p><b>Username:</b> {{ username }}</p>
+  <p><b>Email:</b> {{ email }}</p>
+
+  <p>Your service is running correctly 🚀</p>
+
+  <!-- ✅ LOGOUT BUTTON -->
+  <br>
+  <a href="/logout" style="
+      display:inline-block;
+      padding:10px 16px;
+      background:#dc2626;
+      color:white;
+      border-radius:6px;
+      text-decoration:none;
+  ">
+    Logout
+  </a>
+</div>
+</body>
+</html>

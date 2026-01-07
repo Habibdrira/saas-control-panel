@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<div class="card">
+<form method="post" action="/create">
+<input name="username" placeholder="New user username" required>
+<button class="btn btn-primary">Create Container</button>
+</form>
+</div>
+
+<br>
+
+<div class="card">
+<table>
+<tr>
+<th>User</th><th>Container</th><th>Status</th><th>Port</th><th>Actions</th>
+</tr>
+{% for c in containers %}
+<tr>
+<td>{{ c.name }}</td>
+<td>{{ c.name }}</td>
+<td>{{ c.status }}</td>
+<td>{{ c.port }}</td>
+<td>
+<a class="btn btn-success" href="/start/{{ c.name }}">Start</a>
+<a class="btn btn-danger" onclick="return confirmAction()" href="/stop/{{ c.name }}">Stop</a>
+<a class="btn btn-danger" onclick="return confirmAction()" href="/delete/{{ c.name }}">Delete</a>
+<a class="btn btn-primary" href="/open/{{ c.name }}">Open</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

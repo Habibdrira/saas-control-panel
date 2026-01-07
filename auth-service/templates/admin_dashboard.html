@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Admin Dashboard – Users</h2>
+
+<a href="/admin/logout" class="btn btn-danger" style="float:right;">
+Logout
+</a>
+
+<table border="1" width="100%" style="margin-top:20px;">
+<tr>
+  <th>Username</th>
+  <th>Email</th>
+  <th>Action</th>
+</tr>
+
+{% for u,e in users %}
+<tr>
+  <td>{{ u }}</td>
+  <td>{{ e }}</td>
+  <td>
+    <a href="/admin/delete/{{ u }}"
+       onclick="return confirm('Delete user {{ u }} ?')">
+       Delete
+    </a>
+  </td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
