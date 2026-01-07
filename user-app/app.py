@@ -1,14 +1,18 @@
-from flask import Flask
+from flask import Flask, render_template, redirect
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 @app.route("/")
 def dashboard():
-    return f"""
-    <h1>User Dashboard</h1>
-    <p>Username: {os.getenv('USERNAME')}</p>
-    <p>Email: {os.getenv('EMAIL')}</p>
-    """
+    return render_template(
+        "index.html",
+        username=os.getenv("USERNAME"),
+        email=os.getenv("EMAIL")
+    )
+
+@app.route("/logout")
+def logout():
+    return redirect("http://localhost:5000/user/login")
 
 app.run(host="0.0.0.0", port=80)

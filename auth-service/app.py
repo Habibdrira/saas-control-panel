@@ -1,14 +1,18 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template, session
 import sqlite3, requests
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = "auth-admin-secret"
+
 CONTROL_PANEL = "http://control-panel:5001"
 DB = "users.db"
 
 def db():
     return sqlite3.connect(DB)
 
-# INIT DB (SAFE)
+# ===============================
+# INIT DB
+# ===============================
 c = db()
 c.execute("""
 CREATE TABLE IF NOT EXISTS users (
@@ -18,22 +22,28 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT
 )
 """)
-c.execute("INSERT OR IGNORE INTO users VALUES ('admin','admin@local','admin123','admin')")
+c.execute(
+    "INSERT OR IGNORE INTO users VALUES ('admin','admin@local','admin123','admin')"
+)
 c.commit()
 c.close()
 
+# ===============================
+# HOME
+# ===============================
 @app.route("/")
 def home():
     return redirect("/user/login")
 
-################ USER REGISTER ################
+# ===============================
+# USER REGISTER
+# ===============================
 @app.route("/user/register", methods=["GET","POST"])
 def user_register():
     if request.method == "POST":
         u = request.form["username"]
         e = request.form["email"]
         p = request.form["password"]
-
         try:
             c = db()
             c.execute("INSERT INTO users VALUES (?,?,?,?)",(u,e,p,"user"))
@@ -46,25 +56,17 @@ def user_register():
             )
             return redirect("/user/login")
         except:
-            return "User already exists"
+            return render_template("register.html", error="User already exists")
+    return render_template("register.html")
 
-    return """
-    <h2>User Register</h2>
-    <form method="post">
-      <input name="username" required>
-      <input name="email" required>
-      <input name="password" required>
-      <button>Register</button>
-    </form>
-    """
-
-################ USER LOGIN ################
+# ===============================
+# USER LOGIN
+# ===============================
 @app.route("/user/login", methods=["GET","POST"])
 def user_login():
     if request.method == "POST":
         u = request.form["username"]
         p = request.form["password"]
-
         c = db()
         r = c.execute(
             "SELECT * FROM users WHERE username=? AND password=? AND role='user'",
@@ -73,7 +75,7 @@ def user_login():
         c.close()
 
         if not r:
-            return "Invalid login"
+            return render_template("login.html", error="Invalid login")
 
         port = requests.get(
             f"{CONTROL_PANEL}/api/user/{u}/port"
@@ -81,62 +83,70 @@ def user_login():
 
         return redirect(f"http://localhost:{port}")
 
-    return """
-    <h2>User Login</h2>
-    <form method="post">
-      <input name="username">
-      <input name="password">
-      <button>Login</button>
-    </form>
-    """
+    return render_template("login.html")
 
-################ ADMIN AUTH ################
+# ===============================
+# ADMIN LOGIN (AUTH-SERVICE)
+# ===============================
 @app.route("/admin/login", methods=["GET","POST"])
 def admin_login():
     if request.method == "POST":
         if request.form["username"]=="admin" and request.form["password"]=="admin123":
+            session["admin"] = True
             return redirect("/admin/dashboard")
-        return "Invalid admin"
+        return render_template("admin_login.html", error="Invalid admin")
 
-    return """
-    <h2>Admin Login</h2>
-    <form method="post">
-      <input name="username">
-      <input name="password">
-      <button>Login</button>
-    </form>
-    """
+    return render_template("admin_login.html")
 
+# ===============================
+# ADMIN DASHBOARD (AUTH-SERVICE)
+# ===============================
 @app.route("/admin/dashboard")
 def admin_dashboard():
+    if not session.get("admin"):
+        return redirect("/admin/login")
+
     c = db()
     users = c.execute(
         "SELECT username,email FROM users WHERE role='user'"
     ).fetchall()
     c.close()
 
-    html = "<h1>Users</h1><table border=1>"
-    html += "<tr><th>User</th><th>Email</th><th>Port</th><th>Action</th></tr>"
+    return render_template(
+        "admin_dashboard.html",
+        users=users
+    )
 
-    for u,e in users:
-        try:
-            port = requests.get(
-                f"{CONTROL_PANEL}/api/user/{u}/port"
-            ).json()["port"]
-        except:
-            port = "-"
-        html += f"<tr><td>{u}</td><td>{e}</td><td>{port}</td><td><a href='/admin/delete/{u}'>Delete</a></td></tr>"
+# ===============================
+# DELETE USER (AUTH-SERVICE)
+# ===============================
+@app.route("/admin/delete/<username>")
+def admin_delete_user(username):
+    if not session.get("admin"):
+        return redirect("/admin/login")
 
-    html += "</table>"
-    return html
-
-@app.route("/admin/delete/<u>")
-def delete_user(u):
     c = db()
-    c.execute("DELETE FROM users WHERE username=?", (u,))
+    c.execute("DELETE FROM users WHERE username=?", (username,))
     c.commit()
     c.close()
-    requests.delete(f"{CONTROL_PANEL}/api/user/{u}")
+
+    # delete container too
+    try:
+        requests.delete(f"{CONTROL_PANEL}/api/user/{username}")
+    except:
+        pass
+
     return redirect("/admin/dashboard")
 
+# ===============================
+# ADMIN LOGOUT
+# ===============================
+@app.route("/admin/logout")
+def admin_logout():
+    session.clear()
+    return redirect("/admin/login")
+
+# ===============================
+# RUN
+# ===============================
 app.run(host="0.0.0.0", port=5000)
