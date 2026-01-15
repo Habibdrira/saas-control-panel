@@ -37,29 +37,6 @@ docker --version
 docker compose version
 ```
 
-**Installation sur macOS:**
-```bash
-# Télécharger et installer Docker Desktop depuis:
-# https://www.docker.com/products/docker-desktop
-
-# Ou avec Homebrew:
-brew install --cask docker
-```
-
-**Installation sur Windows:**
-```powershell
-# Télécharger et installer Docker Desktop depuis:
-# https://www.docker.com/products/docker-desktop
-
-# Activer WSL2 si nécessaire
-wsl --install
-```
-
-**Vérifier que Docker fonctionne:**
-```bash
-docker run hello-world
-```
-
 ## �🚀 Démarrage Rapide
 
 ```bash
