@@ -2,7 +2,65 @@
 
 **Plateforme SaaS complète pour gérer des conteneurs utilisateurs avec interface admin et dashboards personnels.**
 
-## 🚀 Démarrage Rapide
+## � Prérequis
+
+**Installation requise:**
+
+### Docker
+Docker est obligatoire pour exécuter cette plateforme.
+
+**Installation sur Linux:**
+```bash
+# Mise à jour du système
+sudo apt-get update
+
+# Installation des dépendances
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+# Ajout de la clé GPG officielle de Docker
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Configuration du dépôt Docker
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Installation de Docker
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Ajouter votre utilisateur au groupe docker (pour éviter sudo)
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Vérifier l'installation
+docker --version
+docker compose version
+```
+
+**Installation sur macOS:**
+```bash
+# Télécharger et installer Docker Desktop depuis:
+# https://www.docker.com/products/docker-desktop
+
+# Ou avec Homebrew:
+brew install --cask docker
+```
+
+**Installation sur Windows:**
+```powershell
+# Télécharger et installer Docker Desktop depuis:
+# https://www.docker.com/products/docker-desktop
+
+# Activer WSL2 si nécessaire
+wsl --install
+```
+
+**Vérifier que Docker fonctionne:**
+```bash
+docker run hello-world
+```
+
+## �🚀 Démarrage Rapide
 
 ```bash
 # Construire les services
@@ -147,8 +205,17 @@ docker compose restart
 
 **Réinitialiser la base de données:**
 ```bash
+# Option 1: Via API (recommandé)
+curl -X POST http://localhost:5001/api/admin/reset-database \
+  -H "Cookie: session=YOUR_SESSION_COOKIE"
+
+# Option 2: Manuellement via Docker
 docker exec saas-control-panel-control-panel-1 rm /data/saas_control_panel.db
 docker compose restart
+
+# Option 3: Supprimer le volume Docker complet
+docker compose down -v
+docker compose up -d
 ```
 
 ## 📊 Informations Techniques

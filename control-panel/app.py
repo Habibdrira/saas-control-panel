@@ -3,6 +3,7 @@ from flask import (
     render_template, session, url_for
 )
 import docker
+import os
 from database import (
     get_admin_stats,
     get_all_users,
@@ -14,7 +15,10 @@ from database import (
     create_container as db_create_container,
     update_container_status as db_update_container_status,
     delete_container as db_delete_container,
-    log_activity
+    delete_all_users as db_delete_all_users,
+    log_activity,
+    init_db,
+    DB_PATH
 )
 
 # ===============================
@@ -32,6 +36,7 @@ client = docker.from_env()
 # ===============================
 # AUTH ADMIN
 # ===============================
+@app.route("/", methods=["GET", "POST"])
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -291,6 +296,39 @@ def delete_container(name):
         pass
     cont.remove(force=True)
     return redirect("/admin/dashboard")
+
+# ===============================
+# RESET DATABASE
+# ===============================
+@app.route("/api/admin/reset-database", methods=["POST"])
+def reset_database():
+    """Supprimer et réinitialiser la base de données"""
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    
+    try:
+        # Supprimer le fichier de base de données
+        if os.path.exists(DB_PATH):
+            os.remove(DB_PATH)
+        
+        # Réinitialiser avec une nouvelle base vide
+        init_db()
+        
+        return {"success": True, "message": "Base de données réinitialisée"}
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+@app.route("/api/admin/delete-all-users", methods=["POST"])
+def delete_all_users():
+    """Supprimer tous les utilisateurs de la base de données"""
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    
+    result = db_delete_all_users()
+    if result.get('success'):
+        return result
+    else:
+        return result, 500
 
 # ===============================
 # RUN

@@ -241,6 +241,22 @@ def delete_container(container_id):
     conn.commit()
     conn.close()
 
+def delete_all_users():
+    """Delete all users and their associated data"""
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        # Delete in order due to foreign keys
+        c.execute('DELETE FROM metrics')
+        c.execute('DELETE FROM activity_logs')
+        c.execute('DELETE FROM containers')
+        c.execute('DELETE FROM users')
+        conn.commit()
+        conn.close()
+        return {'success': True, 'message': 'All users deleted'}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
 # ============================================
 # ACTIVITY LOG OPERATIONS
 # ============================================
