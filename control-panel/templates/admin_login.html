@@ -1,14 +1,151 @@
 {% extends "base.html" %}
+{% block title %}Admin Login - Control Panel{% endblock %}
 {% block content %}
-<div class="card" style="max-width:400px;margin:auto;">
-  <h2>Admin Login</h2>
-  {% if error %}
-    <p style="color:red">{{ error }}</p>
-  {% endif %}
-  <form method="post">
-    <input name="username" placeholder="Admin username" required><br><br>
-    <input type="password" name="password" placeholder="Password" required><br><br>
-    <button class="btn btn-success">Login</button>
-  </form>
+<div class="login-container">
+  <div class="card admin-login-card">
+    <div class="login-header">
+      <h2>Admin Login</h2>
+      <p>Secure access to control panel</p>
+    </div>
+
+    {% if error %}
+      <div class="error-message">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          id="username"
+          type="text" 
+          name="username" 
+          placeholder="Enter admin username" 
+          required
+          minlength="3"
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          id="password"
+          type="password" 
+          name="password" 
+          placeholder="Enter password" 
+          required
+          minlength="6"
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+
+    <div class="login-footer">
+      <p><a href="/user/login">User login</a></p>
+    </div>
+  </div>
 </div>
+
+<style>
+  .login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+  }
+
+  .admin-login-card {
+    max-width: 420px;
+    width: 100%;
+  }
+
+  .login-header {
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .login-header h2 {
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+
+  .login-header p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger-color);
+    color: #7f1d1d;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .error-icon {
+    font-size: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  .login-footer {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .login-footer a {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .login-footer a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      min-height: auto;
+      padding: 20px;
+    }
+
+    .login-header h2 {
+      font-size: 24px;
+    }
+  }
+</style>
 {% endblock %}

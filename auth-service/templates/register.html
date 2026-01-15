@@ -1,14 +1,41 @@
 {% extends "base.html" %}
+{% block title %}Register - SaaS Control Panel{% endblock %}
 {% block content %}
 <div class="card">
-<h2>User Register</h2>
-{% if error %}<p class="error">{{ error }}</p>{% endif %}
-<form method="post">
-<input name="username" placeholder="Username" required>
-<input name="email" placeholder="Email" required>
-<input type="password" name="password" placeholder="Password" required>
-<button>Register</button>
-</form>
-<a href="/user/login">Back to login</a>
+  <h2>Create Account</h2>
+  
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  
+  <form method="post" novalidate>
+    <input 
+      type="text" 
+      name="username" 
+      placeholder="Username" 
+      required
+      autocomplete="username"
+      minlength="3"
+      maxlength="50"
+    >
+    <input 
+      type="email" 
+      name="email" 
+      placeholder="Email address" 
+      required
+      autocomplete="email"
+    >
+    <input 
+      type="password" 
+      name="password" 
+      placeholder="Password" 
+      required
+      autocomplete="new-password"
+      minlength="6"
+    >
+    <button type="submit">Create Account</button>
+  </form>
+  
+  <a href="/user/login">Already have an account?</a>
 </div>
 {% endblock %}

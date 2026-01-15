@@ -3,6 +3,19 @@ from flask import (
     render_template, session, url_for
 )
 import docker
+from database import (
+    get_admin_stats,
+    get_all_users,
+    get_all_containers,
+    get_all_activity_logs,
+    get_user_by_username,
+    get_container_by_name,
+    create_user as db_create_user,
+    create_container as db_create_container,
+    update_container_status as db_update_container_status,
+    delete_container as db_delete_container,
+    log_activity
+)
 
 # ===============================
 # APP CONFIG
@@ -63,10 +76,43 @@ def admin_dashboard():
             "port": port
         })
 
+    stats = get_admin_stats() or {}
+    recent_logs = get_all_activity_logs(limit=10) or []
+    users = get_all_users() or []
     return render_template(
         "dashboard_admin.html",
-        containers=containers_data
+        containers=containers_data,
+        stats=stats,
+        logs=recent_logs,
+        users=users
     )
+
+# ===============================
+# ADMIN API ENDPOINTS (DB-BACKED)
+# ===============================
+@app.route("/api/admin/stats")
+def api_admin_stats():
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    return get_admin_stats()
+
+@app.route("/api/admin/users")
+def api_admin_users():
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    return {"users": get_all_users()}
+
+@app.route("/api/admin/containers")
+def api_admin_containers():
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    return {"containers": get_all_containers()}
+
+@app.route("/api/admin/activity-logs")
+def api_admin_activity_logs():
+    if not session.get("admin"):
+        return {"error": "unauthorized"}, 401
+    return {"logs": get_all_activity_logs()}
 
 # ===============================
 # CREATE CONTAINER (MANUAL)
@@ -79,16 +125,40 @@ def create_container():
     u = request.form["username"]
 
     try:
-        client.containers.run(
+        # Ensure user exists in DB
+        user = get_user_by_username(u)
+        if not user:
+            res = db_create_user(u, "manual@local", "")
+            if not res.get("success"):
+                return redirect("/admin/dashboard")
+            user_id = res["user_id"]
+            user = get_user_by_username(u)
+        else:
+            user_id = user["id"]
+
+        # Create container
+        cont = client.containers.run(
             "user-app",
             name=f"user-{u}",
             detach=True,
             ports={"80/tcp": None},
             environment={
                 "USERNAME": u,
-                "EMAIL": "manual@local"
+                "EMAIL": user.get("email", "manual@local")
             }
         )
+        cont.reload()
+        ports = cont.attrs.get("NetworkSettings", {}).get("Ports", {})
+        port = None
+        if ports and ports.get("80/tcp"):
+            port = int(ports["80/tcp"][0]["HostPort"]) if ports["80/tcp"][0].get("HostPort") else None
+
+        # Persist to DB
+        res = db_create_container(user_id, cont.id, cont.name, port or 0)
+        if res.get('success'):
+            container_pk = res['container_id']
+            db_update_container_status(container_pk, 'running')
+            log_activity(user_id, container_pk, 'container_created', f'Container {cont.name} created')
     except Exception:
         pass
 
@@ -103,16 +173,40 @@ def api_provision():
     e = request.json.get("email", "")
 
     try:
-        client.containers.run(
+        # Ensure user exists in DB
+        user = get_user_by_username(u)
+        if not user:
+            res = db_create_user(u, e or "", "")
+            if not res.get("success"):
+                return {"status": "error", "error": res.get("error")}, 400
+            user_id = res["user_id"]
+            user = get_user_by_username(u)
+        else:
+            user_id = user["id"]
+
+        # Create container
+        cont = client.containers.run(
             "user-app",
             name=f"user-{u}",
             detach=True,
             ports={"80/tcp": None},
             environment={
                 "USERNAME": u,
-                "EMAIL": e
+                "EMAIL": user.get("email", e or "")
             }
         )
+        cont.reload()
+        ports = cont.attrs.get("NetworkSettings", {}).get("Ports", {})
+        port = None
+        if ports and ports.get("80/tcp"):
+            port = int(ports["80/tcp"][0]["HostPort"]) if ports["80/tcp"][0].get("HostPort") else None
+
+        # Persist to DB
+        res = db_create_container(user_id, cont.id, cont.name, port or 0)
+        if res.get('success'):
+            container_pk = res['container_id']
+            db_update_container_status(container_pk, 'running')
+            log_activity(user_id, container_pk, 'container_created', f'Container {cont.name} provisioned')
     except Exception:
         pass
 
@@ -155,7 +249,15 @@ def start_container(name):
     if not session.get("admin"):
         return redirect("/login")
 
-    client.containers.get(name).start()
+    cont = client.containers.get(name)
+    cont.start()
+    try:
+        rec = get_container_by_name(name)
+        if rec:
+            db_update_container_status(rec['id'], 'running')
+            log_activity(rec['user_id'], rec['id'], 'container_started', f'{name} started')
+    except Exception:
+        pass
     return redirect("/admin/dashboard")
 
 @app.route("/stop/<name>")
@@ -163,7 +265,15 @@ def stop_container(name):
     if not session.get("admin"):
         return redirect("/login")
 
-    client.containers.get(name).stop()
+    cont = client.containers.get(name)
+    cont.stop()
+    try:
+        rec = get_container_by_name(name)
+        if rec:
+            db_update_container_status(rec['id'], 'stopped')
+            log_activity(rec['user_id'], rec['id'], 'container_stopped', f'{name} stopped')
+    except Exception:
+        pass
     return redirect("/admin/dashboard")
 
 @app.route("/delete/<name>")
@@ -171,7 +281,15 @@ def delete_container(name):
     if not session.get("admin"):
         return redirect("/login")
 
-    client.containers.get(name).remove(force=True)
+    cont = client.containers.get(name)
+    try:
+        rec = get_container_by_name(name)
+        if rec:
+            log_activity(rec['user_id'], rec['id'], 'container_deleted', f'{name} deleted')
+            db_delete_container(rec['id'])
+    except Exception:
+        pass
+    cont.remove(force=True)
     return redirect("/admin/dashboard")
 
 # ===============================

@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Auth Service</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SaaS Control Panel - Secure authentication and multi-tenant management">
+  <title>{% block title %}SaaS Control Panel{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-{% block content %}{% endblock %}
+  {% block content %}{% endblock %}
+  <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

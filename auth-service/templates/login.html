@@ -1,14 +1,34 @@
 {% extends "base.html" %}
+{% block title %}Login - SaaS Control Panel{% endblock %}
 {% block content %}
 <div class="card">
-<h2>User Login</h2>
-{% if error %}<p class="error">{{ error }}</p>{% endif %}
-<form method="post">
-<input name="username" placeholder="Username" required>
-<input type="password" name="password" placeholder="Password" required>
-<button>Login</button>
-</form>
-<a href="/user/register">Create account</a>
-<a href="/admin/login">Admin login</a>
+  <h2>Welcome Back</h2>
+  
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  
+  <form method="post" novalidate>
+    <input 
+      type="text" 
+      name="username" 
+      placeholder="Username" 
+      required
+      autocomplete="username"
+      minlength="3"
+    >
+    <input 
+      type="password" 
+      name="password" 
+      placeholder="Password" 
+      required
+      autocomplete="current-password"
+      minlength="6"
+    >
+    <button type="submit">Sign In</button>
+  </form>
+  
+  <a href="/user/register">Create new account</a>
+  <a href="/admin/login">Admin panel</a>
 </div>
 {% endblock %}

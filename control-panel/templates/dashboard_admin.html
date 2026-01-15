@@ -1,35 +1,409 @@
 {% extends "base.html" %}
+{% block title %}Admin Dashboard - Container Management{% endblock %}
 {% block content %}
-<h2>Admin Dashboard</h2>
 
-<div class="card">
-<form method="post" action="/create">
-<input name="username" placeholder="New user username" required>
-<button class="btn btn-primary">Create Container</button>
-</form>
+<div class="page-header">
+  <div>
+    <h1>Container Management</h1>
+    <p class="subtitle">Manage and provision user containers</p>
+  </div>
 </div>
 
-<br>
-
-<div class="card">
-<table>
-<tr>
-<th>User</th><th>Container</th><th>Status</th><th>Port</th><th>Actions</th>
-</tr>
-{% for c in containers %}
-<tr>
-<td>{{ c.name }}</td>
-<td>{{ c.name }}</td>
-<td>{{ c.status }}</td>
-<td>{{ c.port }}</td>
-<td>
-<a class="btn btn-success" href="/start/{{ c.name }}">Start</a>
-<a class="btn btn-danger" onclick="return confirmAction()" href="/stop/{{ c.name }}">Stop</a>
-<a class="btn btn-danger" onclick="return confirmAction()" href="/delete/{{ c.name }}">Delete</a>
-<a class="btn btn-primary" href="/open/{{ c.name }}">Open</a>
-</td>
-</tr>
-{% endfor %}
-</table>
+<!-- STATS OVERVIEW -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">👤</div>
+    <div class="stat-content">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="stat-subtext">Active accounts</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📦</div>
+    <div class="stat-content">
+      <div class="stat-label">Total Containers</div>
+      <div class="stat-value">{{ stats.total_containers }}</div>
+      <div class="stat-subtext">Provisioned services</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">▶</div>
+    <div class="stat-content">
+      <div class="stat-label">Running</div>
+      <div class="stat-value">{{ stats.running_containers }}</div>
+      <div class="stat-subtext">Currently active</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">⚠️</div>
+    <div class="stat-content">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value">{{ stats.failed_containers }}</div>
+      <div class="stat-subtext">Needs attention</div>
+    </div>
+  </div>
 </div>
+
+<!-- CREATE CONTAINER SECTION -->
+<div class="card card-create">
+  <div class="card-header">
+    <h2>Provision New Container</h2>
+    <p>Create a new user container instance</p>
+  </div>
+  
+  <form method="post" action="/create" class="form-inline">
+    <div class="form-group">
+      <input 
+        type="text" 
+        name="username" 
+        placeholder="Username" 
+        required
+        minlength="3"
+        maxlength="50"
+        pattern="[a-zA-Z0-9_-]+"
+        title="Username must be 3-50 characters, alphanumeric with underscores or hyphens"
+      >
+    </div>
+    <button type="submit" class="btn btn-primary">Create Container</button>
+  </form>
+</div>
+
+<!-- CONTAINERS TABLE SECTION -->
+<div class="card card-table">
+  <div class="card-header">
+    <h2>Active Containers</h2>
+    <p>{{ containers|length }} container{{ 's' if containers|length != 1 else '' }} total</p>
+  </div>
+
+  <div class="table-tools">
+    <input id="container-filter" type="text" placeholder="Filter by user, name, or status…" aria-label="Filter containers">
+  </div>
+  
+  {% if containers %}
+    <div class="table-responsive">
+      <table class="table-striped" id="containers-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Container Name</th>
+            <th>Status</th>
+            <th>Port</th>
+            <th style="width: 280px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in containers %}
+          <tr class="container-row status-{{ c.status.split()[0]|lower }}">
+            <td>
+              <strong class="cell-user">{{ c.name.replace('user-', '') }}</strong>
+            </td>
+            <td>
+              <code class="container-name cell-name">{{ c.name }}</code>
+            </td>
+            <td>
+              <span class="badge badge-{{ 'success' if 'running' in c.status else 'warning' if 'paused' in c.status else 'danger' }} cell-status">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>
+              {% if c.port != "-" %}
+                <code class="cell-port">{{ c.port }}</code>
+              {% else %}
+                <span class="text-muted cell-port">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a href="/start/{{ c.name }}" class="btn btn-success btn-sm" title="Start container">
+                  ▶ Start
+                </a>
+                <a href="/stop/{{ c.name }}" class="btn btn-warning btn-sm" onclick="return confirmStop()" title="Stop container">
+                  ⏸ Stop
+                </a>
+                <a href="/delete/{{ c.name }}" class="btn btn-danger btn-sm" onclick="return confirmDelete()" title="Delete container permanently">
+                  🗑 Delete
+                </a>
+                {% if c.port != "-" %}
+                  <a href="http://localhost:{{ c.port }}" target="_blank" class="btn btn-primary btn-sm" title="Open in browser">
+                    🔗 Open
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p class="empty-icon">📦</p>
+      <p class="empty-title">No containers yet</p>
+      <p class="empty-text">Create your first container above to get started.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- RECENT ACTIVITY -->
+<div class="card">
+  <div class="card-header">
+    <h2>Recent Activity</h2>
+    <p>Latest system actions</p>
+  </div>
+  <div class="activity-timeline">
+    {% if logs %}
+      {% for item in logs %}
+      <div class="activity-item">
+        <span class="activity-time">{{ item.timestamp }}</span>
+        <span class="activity-action"><strong>{{ item.username or 'system' }}</strong> — {{ item.action }} ({{ item.details }})</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="activity-item">
+        <span class="activity-time">-</span>
+        <span class="activity-action">No recent activity</span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- USERS LIST -->
+<div class="card">
+  <div class="card-header">
+    <h2>Users</h2>
+    <p>{{ users|length }} user{{ 's' if users|length != 1 else '' }} total</p>
+  </div>
+  {% if users %}
+    <div class="table-responsive">
+      <table class="table-striped">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Last Login</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td><strong>{{ u.username }}</strong></td>
+            <td><span class="text-muted">{{ u.email or '-' }}</span></td>
+            <td><span class="text-muted">{{ u.last_login or '-' }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p class="empty-title">No users found</p>
+      <p class="empty-text">Users will appear here when registered.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .page-header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-bg);
+    border-radius: 8px;
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .stat-subtext {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .page-header h1 {
+    margin: 0 0 4px 0;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .card-header {
+    margin-bottom: 24px;
+  }
+
+  .card-header h2 {
+    margin-bottom: 4px;
+  }
+
+  .card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .form-inline {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .form-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .form-group input {
+    width: 100%;
+  }
+
+  .form-inline button {
+    white-space: nowrap;
+  }
+
+  .table-tools {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+
+  .table-tools input {
+    max-width: 320px;
+    width: 100%;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table-striped tbody tr:nth-child(odd) {
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+
+  .container-name {
+    background: var(--light-bg);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .status-running {
+    border-left: 4px solid var(--success-color);
+  }
+
+  .status-exited {
+    border-left: 4px solid var(--danger-color);
+    opacity: 0.7;
+  }
+
+  .status-paused {
+    border-left: 4px solid var(--warning-color);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .text-muted {
+    color: var(--text-secondary);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+
+  .empty-text {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .form-inline {
+      flex-direction: column;
+    }
+
+    .form-inline button {
+      width: 100%;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-sm {
+      width: 100%;
+      text-align: center;
+    }
+
+    table {
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 8px 4px;
+    }
+  }
+</style>
+
 {% endblock %}

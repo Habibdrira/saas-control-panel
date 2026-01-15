@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <strong>⚙️ Settings</strong>
+      <span class="navbar-subtitle">{{ current_user }}</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="/" class="nav-link">← Back to Dashboard</a>
+      <a href="/logout" class="nav-link nav-logout">🚪 Logout</a>
+    </div>
+  </nav>
+
+  <!-- CONTAINER -->
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>Account Settings</h1>
+        <p class="subtitle">Manage your account and service preferences</p>
+      </div>
+    </div>
+
+    <!-- ACCOUNT SETTINGS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Account Information</h2>
+        <p>Your account details</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Username</span>
+          <span class="info-value">{{ username }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email Address</span>
+          <span class="info-value">{{ email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Account Status</span>
+          <span class="health-badge healthy" style="padding: 6px 12px;">✓ Active</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Member Since</span>
+          <span class="info-value">2024-01-10</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; gap: 12px;">
+        <button class="btn btn-primary" onclick="alert('Feature coming soon!')">
+          🔐 Change Password
+        </button>
+        <button class="btn btn-secondary" onclick="alert('Feature coming soon!')">
+          📧 Update Email
+        </button>
+      </div>
+    </div>
+
+    <!-- SERVICE SETTINGS -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Service Settings</h2>
+        <p>Customize your service behavior</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong>Auto-restart on crash</strong>
+            <input type="checkbox" checked />
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">
+            Automatically restart service if it crashes unexpectedly
+          </p>
+        </div>
+
+        <div style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong>Email notifications</strong>
+            <input type="checkbox" checked />
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">
+            Receive email alerts for important service events
+          </p>
+        </div>
+
+        <div style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong>Performance monitoring</strong>
+            <input type="checkbox" checked />
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">
+            Enable detailed performance metrics and analytics
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; gap: 12px;">
+        <button class="btn btn-primary" onclick="alert('Settings saved!')">
+          💾 Save Changes
+        </button>
+        <button class="btn btn-secondary" onclick="location.reload();">
+          ↻ Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="card">
+      <div class="card-header">
+        <h2 style="color: var(--danger-color);">⚠️ Danger Zone</h2>
+        <p>Irreversible actions - use with caution</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn" style="background: var(--warning-color); color: white; width: 100%; text-align: center;" 
+                onclick="alert('Feature coming soon!')">
+          🔄 Reset Service Configuration
+        </button>
+        <button class="btn" style="background: var(--danger-color); color: white; width: 100%; text-align: center;" 
+                onclick="if(confirm('Are you sure? This cannot be undone.')) alert('Deleting account...')">
+          🗑 Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --light-bg: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-secondary: #64748b;
+    }
+  </style>
+</body>
+</html>

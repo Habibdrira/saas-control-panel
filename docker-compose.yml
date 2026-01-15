@@ -5,6 +5,8 @@ services:
     build: ./auth-service
     ports:
       - "5000:5000"
+    volumes:
+      - saas-data:/data
     depends_on:
       - control-panel
       - user-app
@@ -15,9 +17,15 @@ services:
       - "5001:5001"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - saas-data:/data
     depends_on:
       - user-app
 
   user-app:
     build: ./user-app
     image: user-app
+    volumes:
+      - saas-data:/data
+
+volumes:
+  saas-data:
