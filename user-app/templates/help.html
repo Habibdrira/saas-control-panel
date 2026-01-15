@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & Support - Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <strong>❓ Help & Support</strong>
+      <span class="navbar-subtitle">{{ current_user }}</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="/" class="nav-link">← Back to Dashboard</a>
+      <a href="/logout" class="nav-link nav-logout">🚪 Logout</a>
+    </div>
+  </nav>
+
+  <!-- CONTAINER -->
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>Help & Support</h1>
+        <p class="subtitle">Get answers to common questions and troubleshoot issues</p>
+      </div>
+    </div>
+
+    <!-- FAQ SECTION -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Find quick answers to common questions</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <details style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;">
+          <summary style="font-weight: 600; color: var(--text-primary); user-select: none;">
+            📌 How do I restart my service?
+          </summary>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+            You can restart your service by clicking the "Restart" button on the main dashboard. The service will be restarted gracefully with minimal downtime.
+          </div>
+        </details>
+
+        <details style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;">
+          <summary style="font-weight: 600; color: var(--text-primary); user-select: none;">
+            📊 What do the performance metrics mean?
+          </summary>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+            <ul style="padding-left: 20px; margin: 0;">
+              <li><strong>CPU Usage:</strong> Percentage of CPU resources being utilized</li>
+              <li><strong>Memory Usage:</strong> Percentage of available memory being used</li>
+              <li><strong>Uptime:</strong> Percentage of time your service has been running without interruption</li>
+            </ul>
+          </div>
+        </details>
+
+        <details style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;">
+          <summary style="font-weight: 600; color: var(--text-primary); user-select: none;">
+            🔗 How do I access my service?
+          </summary>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+            Your service is accessible via <code style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-family: monospace;">localhost:PORT</code> where PORT is shown on your dashboard. Use the port number to connect to your service.
+          </div>
+        </details>
+
+        <details style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;">
+          <summary style="font-weight: 600; color: var(--text-primary); user-select: none;">
+            ⚠️ What should I do if my service crashes?
+          </summary>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+            If your service crashes, enable "Auto-restart on crash" in Settings. You can also check the service logs for error details and contact support if the issue persists.
+          </div>
+        </details>
+
+        <details style="padding: 16px; background: var(--light-bg); border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;">
+          <summary style="font-weight: 600; color: var(--text-primary); user-select: none;">
+            🔒 How secure is my data?
+          </summary>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+            Your data is encrypted in transit using HTTPS and at rest using industry-standard encryption. We perform regular security audits and comply with data protection regulations.
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- SUPPORT CONTACT -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Still Need Help?</h2>
+        <p>Reach out to our support team</p>
+      </div>
+
+      <div class="stats-grid" style="margin: 0;">
+        <div class="stat-card">
+          <div class="stat-icon">📧</div>
+          <div class="stat-content">
+            <div class="stat-label">Email Support</div>
+            <div class="stat-value" style="font-size: 16px;">support@saas.io</div>
+            <div class="stat-subtext">Response within 2 hours</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div class="stat-content">
+            <div class="stat-label">Live Chat</div>
+            <div class="stat-value" style="font-size: 16px;">9am - 6pm EST</div>
+            <div class="stat-subtext">Available during business hours</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">📱</div>
+          <div class="stat-content">
+            <div class="stat-label">Phone Support</div>
+            <div class="stat-value" style="font-size: 16px;">+1-800-SAAS</div>
+            <div class="stat-subtext">Premium members only</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-content">
+            <div class="stat-label">Documentation</div>
+            <div class="stat-value" style="font-size: 16px;">docs.saas.io</div>
+            <div class="stat-subtext">Comprehensive guides</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+        <button class="btn btn-primary" style="width: 100%; text-align: center; padding: 14px;">
+          💌 Contact Support
+        </button>
+      </div>
+    </div>
+
+    <!-- RESOURCES -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Useful Resources</h2>
+        <p>Learning materials and documentation</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">📖 Getting Started Guide</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Learn the basics and get up and running in minutes</p>
+        </a>
+
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">🔧 API Reference</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Complete API documentation and examples</p>
+        </a>
+
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">🐛 Troubleshooting</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Common issues and solutions</p>
+        </a>
+
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">🎓 Video Tutorials</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Step-by-step video guides</p>
+        </a>
+
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">💡 Best Practices</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Tips for optimal performance</p>
+        </a>
+
+        <a href="#" style="text-decoration: none; padding: 16px; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease;" 
+           onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(79, 70, 229, 0.02)';" 
+           onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='var(--light-bg)';">
+          <strong style="color: var(--text-primary);">🚀 Advanced Topics</strong>
+          <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Deep dive into advanced features</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --light-bg: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+    }
+
+    details {
+      outline: none;
+    }
+
+    details[open] {
+      background: rgba(79, 70, 229, 0.05) !important;
+      border-color: var(--primary-color) !important;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+      font-size: 32px;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--light-bg);
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  </style>
+</body>
+</html>

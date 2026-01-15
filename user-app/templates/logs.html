@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Logs - Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <strong>📋 Service Logs</strong>
+      <span class="navbar-subtitle">{{ current_user }}</span>
+    </div>
+    <div class="navbar-menu">
+      <a href="/" class="nav-link">← Back to Dashboard</a>
+      <a href="/logout" class="nav-link nav-logout">🚪 Logout</a>
+    </div>
+  </nav>
+
+  <!-- CONTAINER -->
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>Service Logs</h1>
+        <p class="subtitle">Recent service activity and events</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Recent Logs</h2>
+        <p>Service events from the last 24 hours</p>
+      </div>
+
+      <div class="activity-timeline">
+        {% if logs %}
+          {% for log in logs %}
+          <div class="activity-item">
+            <span class="activity-time">{{ log.time }}</span>
+            <span class="activity-action">{{ log.action }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="activity-item">
+          <span class="activity-time">-</span>
+          <span class="activity-action">No logs available</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+        <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">
+          Logs are automatically rotated every 7 days
+        </p>
+        <button onclick="window.print()" class="btn btn-secondary" style="width: 100%; text-align: center;">
+          🖨 Print Logs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --light-bg: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-secondary: #64748b;
+    }
+  </style>
+</body>
+</html>

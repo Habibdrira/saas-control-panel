@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Control Panel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SaaS Control Panel - Manage containers and user instances">
+  <title>{% block title %}Admin Dashboard - SaaS Control Panel{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
-{% include "partials/navbar.html" %}
-<div class="container">
-{% block content %}{% endblock %}
-</div>
+  {% include "partials/navbar.html" %}
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
 </body>
 </html>
